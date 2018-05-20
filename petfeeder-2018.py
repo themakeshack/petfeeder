@@ -476,6 +476,9 @@ try:
             printlcd(0, 1, "Ready to feed   ")
             # printlcd(0,1,'Fed :' + time.strftime("%m-%d %H:%M", time.gmtime(lastFeed)))
             #### See if the button is pressed
+            # start the button press thread
+            buttonpressthread = myThread(1, "ButtonPress", 1, 2)
+            remotefeedrequestthread = myThread(2, "RemoteFeedRequest", 2, 4)
             if buttonpressed(FEEDBUTTONPIN):
                 printdebug("Got here through the feedButton")
                 feedreplyto = emailid
