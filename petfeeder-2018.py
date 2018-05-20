@@ -21,6 +21,7 @@
 import os
 import sys
 import time
+import threading
 
 import RPi.GPIO as GPIO
 from Adafruit_CharLCD import Adafruit_CharLCD
@@ -389,6 +390,18 @@ def takePic():
         # did not detect camera
         return False
 
+# The threading class
+class myThread (threading.Thread):
+   def __init__(self, threadID, name, delay, counter):
+      threading.Thread.__init__(self)
+      self.threadID = threadID
+      self.name = name
+      self.delay = delay
+      self.counter = counter
+   def run(self):
+      print ("Starting " + self.name)
+      pass
+      print ("Exiting " + self.name)
 
 # This is the main program, essentially runs in a continuous loop looking for button press or remote request
 try:
@@ -442,6 +455,11 @@ try:
     #### The main loop ####
 
     while True:
+    # LCD Update thread
+
+    # Button press thread
+
+    # Check email thread
 
         #### If reset button pressed, then reset the counter
         if buttonpressed(RESETBUTTONPIN):
