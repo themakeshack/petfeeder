@@ -45,7 +45,7 @@ NUMBERTRIVIA = False  # Turns on/off Numers Trivia in email replies
 # Files that we care about
 LOGFILE = "/tmp/petfeeder.log"  # General purpoise log file
 PICFILE = "/tmp/picfile.jpg"  # This is where the camera saves the picture
-OAUTHFILE = "/home/pi/projects/petfeeder-2018/petfeeder-gspread.json"  # File with OAUTH2 info
+OAUTHFILE = "/home/pi/projects/petfeeder/petfeeder-gspread.json"  # File with OAUTH2 info
 SPSHEET = "Pet Feeder"  # Google spreadsheet name
 
 MAILSUBJECTS = ['Feed', 'When', 'Pic', "LightON", "LightOFF"]
@@ -74,7 +74,7 @@ LEDLIGHT = 4
 # Variables for feeding information
 readyToFeed = False
 feedInterval = 28800  # 28800  # This translates to 8 hours in seconds
-FEEDFILE = "/home/pi/projects/petfeeder-2018/lastfeed"
+FEEDFILE = "/home/pi/projects/petfeeder/lastfeed"
 cupsToFeed = 1
 motorTime = cupsToFeed * 23  # It takes 23 seconds of motor turning (~1.75 rotations) to get 1 cup of feed
 
