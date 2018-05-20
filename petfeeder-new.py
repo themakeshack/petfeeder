@@ -16,6 +16,7 @@
 ## petfeeder9.py - Added google spreadsheet update
 ## petfeeder-new.py - Major rewrite to include GMail APIs. Upgrade to Jessie and the new python libraries (urllib3). New checks for camera presence
 ## petfeeder-new1.py - Added LED lighting support
+## WIP petfeeder-2018 - change to a multithreaded program to make button pushes realtime
 
 import os
 import sys
