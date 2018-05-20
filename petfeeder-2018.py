@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 
 
-## This is the main program that does the feeding, checking for email and buttons
-## This gets invoked from a shell script called petfeeder.sh which itself gets invoked from cron on reboot
-## The petfeeder.sh takes care of restarting this program if it were to crash for some reason
-## This program maintains an error log at /home/petfeeder/petfeeder.err
-## Its STDOUT is available at /home/petfeeder/petfeeder.log
-##
-## Changelog
-## petfeeder4.py - Added Chuck Norris jokes API call
-## petfeeder5.py - Added file based saving of lastFeed to preserve across reboots
-## petfeeder6.py - Added Numbers Trivia API call with a switch for Chuck Norris and/or Numbers Trivia
-## petfeeder7.py - Added have_internet() to check for internet presence. There were too many crashes in checkmail() or the api callers due to internet unavailability
-## petfeeder8.py - Added camera and picture emailing
-## petfeeder9.py - Added google spreadsheet update
-## petfeeder-new.py - Major rewrite to include GMail APIs. Upgrade to Jessie and the new python libraries (urllib3). New checks for camera presence
-## petfeeder-new1.py - Added LED lighting support
-## WIP petfeeder-2018 - change to a multithreaded program to make button pushes realtime
+# This is the main program that does the feeding, checking for email and buttons
+# This gets invoked from a shell script called petfeeder.sh which itself gets invoked from cron on reboot
+# The petfeeder.sh takes care of restarting this program if it were to crash for some reason
+# This program maintains an error log at /home/petfeeder/petfeeder.err
+# Its STDOUT is available at /home/petfeeder/petfeeder.log
+#
+# Changelog
+# petfeeder4.py - Added Chuck Norris jokes API call
+# petfeeder5.py - Added file based saving of lastFeed to preserve across reboots
+# petfeeder6.py - Added Numbers Trivia API call with a switch for Chuck Norris and/or Numbers Trivia
+# petfeeder7.py - Added have_internet() to check for internet presence. There were too many crashes in checkmail() or the api callers due to internet unavailability
+# petfeeder8.py - Added camera and picture emailing
+# petfeeder9.py - Added google spreadsheet update
+# petfeeder-new.py - Major rewrite to include GMail APIs. Upgrade to Jessie and the new python libraries (urllib3). New checks for camera presence
+# petfeeder-new1.py - Added LED lighting support
+# WIP petfeeder-2018.py - change to a multithreaded program to make button pushes realtime
 
 import os
 import sys
@@ -37,45 +37,43 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # Some switches to turn on or off to change program behavior
 DEBUG = True  # Turns debugging on/off
-MOTORON = True  # Enables or disables the motor - useful while debugging
+MOTORON = False  # Enables or disables the motor - useful while debugging
 CHUCKNORRIS = False  # Turns on/off Chuck Norris jokes in email replies
-NUMBERTRIVIA = True  # Turns on/off Numers Trivia in email replies
+NUMBERTRIVIA = False  # Turns on/off Numers Trivia in email replies
 
 # Files that we care about
 LOGFILE = "/tmp/petfeeder.log"  # General purpoise log file
 PICFILE = "/tmp/picfile.jpg"  # This is where the camera saves the picture
-OAUTHFILE = "/home/pi/projects/petfeeder-new/petfeeder-gspread.json"  # File with OAUTH2 info
+OAUTHFILE = "/home/pi/projects/petfeeder-2018/petfeeder-gspread.json"  # File with OAUTH2 info
 SPSHEET = "Pet Feeder"  # Google spreadsheet name
 
 MAILSUBJECTS = ['Feed', 'When', 'Pic', "LightON", "LightOFF"]
 emailid = "feedlucky@gmail.com"
 
-
-
 # GPIO pins for LCD
-lcd_rs        = 25
-lcd_en        = 24
-lcd_d4        = 23
-lcd_d5        = 17
-lcd_d6        = 21
-lcd_d7        = 22
-lcd_backlight = 4 # This is not used since the backlight control is through a manual potentiometer
+lcd_rs = 25
+lcd_en = 24
+lcd_d4 = 23
+lcd_d5 = 17
+lcd_d6 = 21
+lcd_d7 = 22
+lcd_backlight = 4  # This is not used since the backlight control is through a manual potentiometer
 # Define LCD column and row size for 16x2 LCD.
 lcd_columns = 16
-lcd_rows    = 2
+lcd_rows = 2
 
 # GPIO pins for feeder control
 MOTORCONTROLPIN = 19
 FEEDBUTTONPIN = 6
 RESETBUTTONPIN = 13
 
-#GPIO pin for LED light
-LEDLIGHT=4
+# GPIO pin for LED light
+LEDLIGHT = 4
 
 # Variables for feeding information
 readyToFeed = False
 feedInterval = 28800  # 28800  # This translates to 8 hours in seconds
-FEEDFILE = "/home/pi/projects/petfeeder-new/lastfeed"
+FEEDFILE = "/home/pi/projects/petfeeder-2018/lastfeed"
 cupsToFeed = 1
 motorTime = cupsToFeed * 23  # It takes 23 seconds of motor turning (~1.75 rotations) to get 1 cup of feed
 
@@ -85,7 +83,8 @@ def printdebug(mesg):
     global logFile
     logFile.write(mesg + '\n')
     if DEBUG:
-        print (mesg)
+        print(mesg)
+
 
 def ledlight(command):
     global GPIO
@@ -93,6 +92,7 @@ def ledlight(command):
         GPIO.output(LEDLIGHT, True)
     elif command == "off":
         GPIO.output(LEDLIGHT, False)
+
 
 # Function that checks internet availability
 def have_internet():
@@ -110,7 +110,7 @@ def have_internet():
 
 # Function to update Google spreadsheet
 def ssupdate(method):
-# Disbaling this function for now since we need to upgrade to the new Google Sheets v4 API
+    # Disbaling this function for now since we need to upgrade to the new Google Sheets v4 API
     return
     global OAUTHFILE
     global SPSHEET
@@ -177,6 +177,7 @@ def getNumberTrivia():
     except:
         return "Internet not available"
 
+
 def sendreply(replyto, subject, msgBody, attach=None):
     # construct the message and send a reply
     msgHeader = "Welcome to PetFeeder!\n\n"
@@ -194,7 +195,8 @@ def sendreply(replyto, subject, msgBody, attach=None):
     else:
         reply = petemail.create_message(replyto, subject, msg)
 
-    petemail.send_message('me',reply)
+    petemail.send_message('me', reply)
+
 
 # Function to check email
 def checkmail(petemail):
@@ -229,17 +231,19 @@ def checkmail(petemail):
                     # print(replyto)
                     # When messages handling
                     if subject == "When":
-                        printdebug("Doing When action with" + str(messages[subject][0]) + "and sending reply to " + replyto)
+                        printdebug(
+                            "Doing When action with" + str(messages[subject][0]) + "and sending reply to " + replyto)
                         if (time.time() - lastFeed) > feedInterval:
                             msgBody = "Ready to feed now!"
                         else:
                             msgBody = "The next feeding can begin on " + time.strftime("%b %d at %I:%M %P",
-                                                                                                   time.localtime(
-                                                                                                       lastFeed + feedInterval))
+                                                                                       time.localtime(
+                                                                                           lastFeed + feedInterval))
                         sendreply(replyto, "Thanks for the feeding query", msgBody)
                     # Pic messages handling
                     elif subject == "Pic":
-                        printdebug("Doing Pic action with" + str(messages[subject][0]) + "and sending reply to " + replyto)
+                        printdebug(
+                            "Doing Pic action with" + str(messages[subject][0]) + "and sending reply to " + replyto)
                         lcd.clear()
                         printlcd(0, 0, "Taking Picture")
                         if takePic():
@@ -261,17 +265,18 @@ def checkmail(petemail):
                         ledlight("off")
                     # Feed messages handling
                     elif subject == "Feed":
-                        printdebug("Doing Feed action with" + str(messages[subject][0]) + "and sending reply to " + replyto)
+                        printdebug(
+                            "Doing Feed action with" + str(messages[subject][0]) + "and sending reply to " + replyto)
                         msgBody = "The last feeding was done at " + time.strftime("%b %d at %I:%M %P",
                                                                                   time.localtime(lastFeed))
                         if (time.time() - lastFeed) > feedInterval:
                             msgBody = "\nReady to be fed, will be feeding Lucky shortly"
                         else:
                             msgBody = "\nThe next feeding can begin at " + time.strftime("%b %d at %I:%M %P",
-                                                                                                   time.localtime(
-                                                                                                       lastFeed + feedInterval))
+                                                                                         time.localtime(
+                                                                                             lastFeed + feedInterval))
                         sendreply(replyto, "Thanks for the feeding request", msgBody)
-                        feedreplyto=replyto
+                        feedreplyto = replyto
                         return True
                 # reply = petemail.create_message(replyto, "Reply", "Here is a reply")
                 # print('Found message', message['id'])
@@ -279,15 +284,16 @@ def checkmail(petemail):
 
     return False
 
+
 def buttonpressed(PIN):
     # Check if the button is pressed
     global GPIO
     time.sleep(0.2)
     button_state = GPIO.input(PIN)
-    if button_state == False:
-        return True
-    else:
+    if (button_state):
         return False
+    else:
+        return True
 
 
 def remotefeedrequest():
@@ -332,7 +338,7 @@ def feednow():
         printlcd(0, 0, "Picture Done")
         printlcd(0, 1, "Emailing status")
         sendreply(feedreplyto,
-                                                        "Fed Lucky at " + time.strftime("%b-%d, %Y  %H:%M:%S", time.localtime(time.time())),
+                  "Fed Lucky at " + time.strftime("%b-%d, %Y  %H:%M:%S", time.localtime(time.time())),
                   "Lucky is fed", PICFILE)
     else:
         lcd.clear()
@@ -357,7 +363,7 @@ def saveLastFeed():
 def takePic():
     global PICFILE
     # detect if we have a camera
-    camdetect=int(subprocess.check_output(["vcgencmd", "get_camera"]).decode().strip()[-1])
+    camdetect = int(subprocess.check_output(["vcgencmd", "get_camera"]).decode().strip()[-1])
     if (camdetect):
         # we have a camera
         try:
@@ -370,7 +376,7 @@ def takePic():
                 camera.annotate_text_size = 50
                 camera.resolution = (640, 480)
                 camera.brightness = 55
-                camera.exposure_mode='auto'
+                camera.exposure_mode = 'auto'
                 camera.start_preview()
                 printdebug("Capturing image...")
                 camera.capture(PICFILE)
@@ -412,8 +418,6 @@ try:
     lcd = Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
                            lcd_columns, lcd_rows, lcd_backlight)
     lcd.clear()
-
-
 
     # Initialize lastFeed
     if os.path.isfile(FEEDFILE):
